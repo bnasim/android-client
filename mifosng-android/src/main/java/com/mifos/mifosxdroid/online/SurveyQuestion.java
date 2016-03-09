@@ -15,6 +15,8 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import com.mifos.mifosxdroid.adapters.SurveyPagerAdapter;
+import com.mifos.objects.survey.Scorecard;
+import com.mifos.objects.survey.ScorecardValues;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -22,10 +24,12 @@ import android.widget.Toast;
 
 import com.mifos.mifosxdroid.R;
 import com.mifos.objects.survey.Survey;
+import com.mifos.services.data.ScorecardPayload;
 import com.mifos.utils.MifosApplication;
 import com.mifos.utils.MyPreference;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Vector;
@@ -46,20 +50,25 @@ public class SurveyQuestion extends MifosBaseActivity implements SurveyQuestionF
     private ViewPager pager = null;
     public static final String PREFS_NAME = "MY_PREFS";
     private Button btnNext;
+    private Button btnSubmit;
+    private Button btnPrevious;
     AppCompatActivity activity;
     private PagerAdapter mPagerAdapter = null;
     public static final String ID = "id";
     public static  int surveyId ;
     public static int qid;
+    public static int pchk;
     public static int pfqid;
     public static int pfrid;
     public static int pfrvalue;
+    public static boolean pfselect;
     private List<Fragment> fragments = null;
     SharedPreferences sharedPreferences;
     private String qs;
     ViewPager.OnPageChangeListener mPageChangeListener;
     MyPreference myPreference;
     Context context;
+    List<ScorecardValues> scorecardValues;
 
 
     @Override
@@ -70,7 +79,8 @@ public class SurveyQuestion extends MifosBaseActivity implements SurveyQuestionF
         myPreference = new MyPreference();
         myPreference.resetScorecard(this);
         btnNext = (Button) findViewById(R.id.btnNext );
-
+        btnSubmit = (Button) findViewById(R.id.btnSubmit );
+        btnPrevious = (Button) findViewById(R.id.btnPrevious );
         fragments = new Vector<Fragment>();
 
         Intent mIntent = getIntent();
@@ -104,14 +114,14 @@ public class SurveyQuestion extends MifosBaseActivity implements SurveyQuestionF
 
 
                             }
-
+                            int qSize = survey.getQuestionDatas().size();
                             String[] answerArr = new String[answerList.size()];
                             answerArr = answerList.toArray(answerArr);
-                            fragments.add(SurveyQuestionFragment.newInstance(i, qs, surveyId, answerArr));
+                            fragments.add(SurveyQuestionFragment.newInstance(i, qs, surveyId, answerArr, qSize));
                             answerList.clear();
                         }
 
-                        fragments.add(SurveyLastFragment.newInstance(1,"You have reached the end of Survey"));
+                        fragments.add(SurveyLastFragment.newInstance(1, "You have reached the end of Survey"));
                         mPagerAdapter.notifyDataSetChanged();
 
                     }
@@ -137,18 +147,61 @@ public class SurveyQuestion extends MifosBaseActivity implements SurveyQuestionF
             @Override
             public void onPageSelected(int position) {
 
+                // if(fragmentCommunicator != null)
+                //    fragmentCommunicator.passDataToFragment(pfqid,pfrid,pfrvalue);
+                ScorecardValues scorevalue = new ScorecardValues();
+
+                scorevalue.setQuestionId(pfqid);
+                scorevalue.setResponseId(pfrid);
+                scorevalue.setValue(pfrvalue);
+                // myPreference.addScorecard(context, scorevalue);
+                // boolean isHead = myPreference.checkFavoriteItem(context, scorevalue);
+
+                //  if (myPreference.checkFavoriteItem(context, scorevalue)) {
+                //    myPreference.removeFavorite(context, scorevalue);
+                // myPreference.addScorecard(context, scorevalue);
+                //     Log.i("Duplicate found: ", String.valueOf(pfqid));
+                // }
+                // else {
+                //     myPreference.addScorecard(context, scorevalue);
+                // }
+                if (myPreference.checkScoreQid(context, scorevalue)) {
+                    //    myPreference.removeFavorite(context, scorevalue);
+                    // myPreference.addScorecard(context, scorevalue);
+                    // Log.i("Duplicate found: ", String.valueOf(pfqid));
+                    // myPreference.addScorecard(context, scorevalue);
+                    Log.i("previous removed: ", String.valueOf(pfrid));
+                    // myPreference.addScorecard(context, scorevalue);
+                }
+                else {
+                    myPreference.addScorecard(context, scorevalue);
+                }
 
                 if (pager.getCurrentItem() == mPagerAdapter.getCount() - 1) {
                     btnNext.setVisibility(View.GONE);
+                    btnSubmit.setVisibility(View.VISIBLE);
+                }
+                else {
+                    btnNext.setVisibility(View.VISIBLE);
+                    btnSubmit.setVisibility(View.GONE);
+                }
+                if (pager.getCurrentItem() == 0) {
+                    btnPrevious.setVisibility(View.GONE);
+
+                }
+                else {
+                    btnPrevious.setVisibility(View.VISIBLE);
                 }
             }
 
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-                if (pager.getCurrentItem() == mPagerAdapter.getCount() - 1) {
-                    btnNext.setVisibility(View.GONE);
-                }
+
+               // if (pager.getCurrentItem() == mPagerAdapter.getCount() - 1) {
+               //     btnNext.setVisibility(View.GONE);
+                //    btnSubmit.setVisibility(View.VISIBLE);
+               // }
 
             }
 
@@ -162,23 +215,123 @@ public class SurveyQuestion extends MifosBaseActivity implements SurveyQuestionF
         Button btnNext = (Button) findViewById(R.id.btnNext );
         btnNext.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if(fragmentCommunicator != null)
-                    fragmentCommunicator.passDataToFragment(pfqid,pfrid,pfrvalue);
+                // if(fragmentCommunicator != null)
+                //     fragmentCommunicator.passDataToFragment(pfqid,pfrid,pfrvalue);
+                ScorecardValues scorevalue = new ScorecardValues();
+
+                scorevalue.setQuestionId(pfqid);
+                scorevalue.setResponseId(pfrid);
+                scorevalue.setValue(pfrvalue);
+               // myPreference.addScorecard(context, scorevalue);
+                // boolean isHead = myPreference.checkFavoriteItem(context, scorevalue);
+
+              //  if (myPreference.checkFavoriteItem(context, scorevalue)) {
+                //    myPreference.removeFavorite(context, scorevalue);
+                    // myPreference.addScorecard(context, scorevalue);
+               //     Log.i("Duplicate found: ", String.valueOf(pfqid));
+               // }
+               // else {
+               //     myPreference.addScorecard(context, scorevalue);
+               // }
+                if (myPreference.checkScoreQid(context, scorevalue)) {
+                    //    myPreference.removeFavorite(context, scorevalue);
+                    // myPreference.addScorecard(context, scorevalue);
+                    // Log.i("Duplicate found: ", String.valueOf(pfqid));
+                   // myPreference.addScorecard(context, scorevalue);
+                    Log.i("previous removed: ", String.valueOf(pfrid));
+                   // myPreference.addScorecard(context, scorevalue);
+                }
+                else {
+                         myPreference.addScorecard(context, scorevalue);
+                     }
+                int current = pager.getCurrentItem();
+                final Toast toast = Toast.makeText(context, "You have not selected any option.", Toast.LENGTH_SHORT);
+
+
+                // if (current < fragments.size())
+                //    pager.setCurrentItem(current + 1, true);
+               if (pchk == 1 & current < fragments.size()) {
+                   pager.setCurrentItem(current + 1, true);
+                   toast.cancel();
+               }
+                {
+                   // Toast.makeText(context, "you have not selected any option",
+                     //       Toast.LENGTH_SHORT).show();
+                    //pager.setCurrentItem(current, true);
+                    toast.show();
+                    pchk = 0;
+                }
+
+
+            }
+        });
+        Button btnPrevious = (Button) findViewById(R.id.btnPrevious );
+        btnPrevious.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // if(fragmentCommunicator != null)
+                //     fragmentCommunicator.passDataToFragment(pfqid,pfrid,pfrvalue);
+
                 int current = pager.getCurrentItem();
 
                 if (current < fragments.size())
-                    pager.setCurrentItem(current + 1, true);
+                    pager.setCurrentItem(current -1, true);
+
 
             }});
 
+        Button btnSubmit = (Button) findViewById(R.id.btnSubmit );
+        btnSubmit.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                scorecardValues = myPreference.getScorecards(context);
+                int listSize = scorecardValues.size();
 
+                for (int i = 0; i < listSize; i++) {
+                    Log.i("Response Value: ", scorecardValues.get(i).getValue().toString());
+                    Log.i("Question Id: ", scorecardValues.get(i).getQuestionId().toString());
+                    Log.i("Response Id: ", scorecardValues.get(i).getResponseId().toString());
+                }
+
+                sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                int clientId = sharedPreferences.getInt("CLIENT_ID", 0);
+                int userId = sharedPreferences.getInt("USER_ID", 0);
+                int surveyId = sharedPreferences.getInt("SURVEY_ID", 0);
+                Date date = new Date();
+                ScorecardPayload scorecardPayload = new ScorecardPayload();
+
+                scorecardPayload.setUserId(userId);
+                scorecardPayload.setClientId(clientId);
+                scorecardPayload.setCreatedOn(date);
+                scorecardPayload.setScorecardValues(scorecardValues);
+
+
+                ((MifosApplication)SurveyQuestion.this.getApplication()).api.surveyService.submitScore(surveyId, scorecardPayload, new Callback<Scorecard>() {
+                    @Override
+                    public void success(Scorecard scorecard, Response response) {
+
+                        Toast.makeText(context, "Scorecard created successfully", Toast.LENGTH_LONG).show();
+
+                    }
+
+                    @Override
+                    public void failure(RetrofitError error) {
+
+                       Toast.makeText(context, "Try again", Toast.LENGTH_LONG).show();
+                   }
+                });
+
+            }});
     }
 
+
+
     @Override
-    public void answer(int id, int fqid,int frid,int frValue) {
+    public void answer(int id, int fqid,int frid,int frValue,int chk) {
         pfqid= fqid;
         pfrid= frid;
         pfrvalue=frValue;
+        pchk = chk;
+
+
 
     }
 

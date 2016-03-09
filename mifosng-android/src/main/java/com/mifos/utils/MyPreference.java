@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Created by Nasim Banu on 28,January,2016.
  */
-public class MyPreference {
+public class  MyPreference {
     public static final String PREFS_NAME = "MY_PREFS";
     public static final String SCOREVALUES = "Score_Values";
     public static final String question_id = "question_id";
@@ -59,7 +59,43 @@ public class MyPreference {
         saveScorecards(context, scorecardValues);
     }
 
-
+    public boolean checkFavoriteItem(Context context,ScorecardValues checkProduct) {
+        boolean check = false;
+        List<ScorecardValues> scorecardValues = getScorecards(context);
+        if (scorecardValues != null) {
+            for (ScorecardValues product : scorecardValues) {
+                if (product.equals(checkProduct)) {
+                    check = true;
+                    break;
+                }
+            }
+        }
+        return check;
+    }
+    public boolean checkScoreQid(Context context,ScorecardValues checkProduct) {
+        boolean check = false;
+        List<ScorecardValues> scorecardValues = getScorecards(context);
+        if (scorecardValues != null) {
+            for (ScorecardValues product : scorecardValues) {
+                if (product.getQuestionId() == checkProduct.getQuestionId()) {
+                    product.setResponseId(checkProduct.getResponseId()) ;
+                    product.setValue(checkProduct.getValue());
+                   // removeFavorite(context,product);
+                    check = true;
+                    break;
+                }
+            }
+            saveScorecards(context, scorecardValues);
+        }
+        return check;
+    }
+    public void removeFavorite(Context context, ScorecardValues product) {
+        ArrayList<ScorecardValues> scorecardValues = getScorecards(context);
+        if (scorecardValues != null) {
+            scorecardValues.remove(product);
+            saveScorecards(context, scorecardValues);
+        }
+    }
 
 
     public void resetScorecard(Context context) {

@@ -100,9 +100,9 @@ public class API {
         As Mifos is a multi-tenant platform, all requests require you to specify a tenant
         as a header in each request.
      */
-    public static final String HEADER_MIFOS_TENANT_ID = "X-Mifos-Platform-TenantId";
+    public static final String HEADER_MIFOS_TENANT_ID = "Fineract-Platform-TenantId";
     //This instance has more Data for Testing
-    public static String mInstanceUrl = "https://demo.openmf.org/mifosng-provider/api/v1";
+    public static String mInstanceUrl = "https://demo.openmf.org/fineract-provider/api/v1";
     public static String mTenantIdentifier = "default";
     public CenterService centerService;
     public ClientAccountsService clientAccountsService;

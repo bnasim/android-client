@@ -66,7 +66,7 @@ public class LoginActivity extends MifosBaseActivity implements Callback<User> {
     private static final String IP_ADDRESS_REGEX_PATTERN = "^(\\d|[1-9]\\d|1\\d\\d|2([0-4]\\d|5[0-5]))\\.(\\d|[1-9]\\d|1\\d\\d|2([0-4]\\d|5[0-5]))\\.(\\d|[1-9]\\d|1\\d\\d|2([0-4]\\d|5[0-5]))\\.(\\d|[1-9]\\d|1\\d\\d|2([0-4]\\d|5[0-5]))$";
     public static final String PROTOCOL_HTTP = "http://";
     public static final String PROTOCOL_HTTPS = "https://";
-    public static final String API_PATH = "/mifosng-provider/api/v1";
+    public static final String API_PATH = "/fineract-provider/api/v1";
     SharedPreferences sharedPreferences;
     @InjectView(R.id.et_instanceURL)
     EditText et_instanceURL;
